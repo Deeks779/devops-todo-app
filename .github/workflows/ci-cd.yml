@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Triggers pipeline when pushing to main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu container to run the jobs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3  # This checks out your repo's code
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2  # Set up Docker for multi-platform support
+
+      - name: Build Docker image
+        run: docker build -t my-todo-app .  # Build your app Docker image
+
+      - name: Run tests
+        run: |
+          echo "No tests yet"  # If you have tests, replace with `npm test`
+
+      - name: Deploy to Render (via Render API)
+        if: github.ref == 'refs/heads/main'  # Trigger deployment only on `main` branch
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -d '{"serviceId": "${{ secrets.RENDER_SERVICE_ID }}"}' \
+            https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys
